@@ -20,6 +20,10 @@ defmodule KnnWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/api", KnnWeb do
+    get "/knn", CustomerController, :knn_match
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", KnnWeb do
   #   pipe_through :api
