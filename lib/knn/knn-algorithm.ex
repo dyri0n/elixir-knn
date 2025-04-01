@@ -1,22 +1,23 @@
 defmodule Knn.Algorithm do
   alias Knn.Predictions
+  alias Knn.{Repo, Customer}
 
-  def predict(input_data, k \\ 5) do
+  def predict_probability(input_data, k \\ 10) do
     training_data = Predictions.get_training_data()
+    encoded_input = Predictions.encode_row(input_data)
 
     distances =
       training_data
       |> Enum.map(fn train_row ->
-        {train_row, distance(Predictions.encode_row(input_data), train_row)}
+        {train_row, distance(encoded_input, Map.drop(train_row, [:id]))}
       end)
       |> Enum.sort_by(fn {_row, dist} -> dist end)
       |> Enum.take(k)
 
-    classify(distances)
+    calculate_probability(distances)
   end
 
   defp distance(input, train) do
-    # Asumimos que ambos mapas tienen las mismas claves
     keys = Map.keys(input)
 
     squared_diff =
@@ -29,13 +30,29 @@ defmodule Knn.Algorithm do
     Enum.sum(squared_diff) |> :math.sqrt()
   end
 
-  defp classify(neighbors) do
-    counts =
-      neighbors
-      |> Enum.map(fn {row, _dist} -> row[:repeat_customer] end)
-      |> Enum.frequencies()
+  import Ecto.Query
 
-    Enum.max_by(counts, fn {_class, freq} -> freq end)
-    |> elem(0)
+  import Ecto.Query
+
+  defp calculate_probability(neighbors) do
+    # Extraer los customer_id de los vecinos similares
+    customer_ids = Enum.map(neighbors, fn {row, _dist} -> row[:customer_id] end)
+
+    # Obtener la fecha hace un mes desde hoy
+    one_month_ago = Date.add(Date.utc_today(), -30)
+
+    query =
+      from c in Customer,
+        where: c.customer_id in ^customer_ids and c.purchase_date >= ^one_month_ago,
+        select: count(c.customer_id)
+
+    purchases_count = Repo.one(query)
+    total_neighbors = length(neighbors)
+
+    if total_neighbors > 0 do
+      purchases_count / total_neighbors * 100
+    else
+      0
+    end
   end
 end

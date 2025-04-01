@@ -5,6 +5,7 @@ defmodule Knn.Predictions do
   def get_training_data do
     query =
       from c in Customer,
+        where: c.repeat_customer == "No",
         select: {
           c.gender,
           c.age,
@@ -12,11 +13,23 @@ defmodule Knn.Predictions do
           c.payment_method,
           c.discount_applied,
           c.rating,
-          c.repeat_customer
+          # Guardamos el ID para buscar después si compró
+          c.id
         }
 
     Repo.all(query)
-    |> Enum.map(&encode_row/1)
+    |> Enum.map(fn {gender, age, city, payment_method, discount_applied, rating, id} ->
+      %{
+        # Necesario para buscar después
+        id: id,
+        gender: hash_value(gender),
+        age: age,
+        city: hash_value(city),
+        payment_method: hash_value(payment_method),
+        discount_applied: if(discount_applied == "Yes", do: 1, else: 0),
+        rating: rating
+      }
+    end)
   end
 
   # El One-Hot Encoding (OHE) es una técnica para convertir datos categóricos
@@ -24,14 +37,13 @@ defmodule Knn.Predictions do
   # a cada categoría (como 0, 1, 2), creamos varias columnas, donde cada una
   # representa una categoría y tiene un 1 en la posición correspondiente
   # y 0 en las demás.
-  def encode_row({
-        gender,
-        age,
-        city,
-        payment_method,
-        discount_applied,
-        rating,
-        repeat_customer
+  def encode_row(%{
+        gender: gender,
+        age: age,
+        city: city,
+        payment_method: payment_method,
+        discount_applied: discount_applied,
+        rating: rating
       }) do
     %{
       gender: hash_value(gender),
@@ -39,8 +51,7 @@ defmodule Knn.Predictions do
       city: hash_value(city),
       payment_method: hash_value(payment_method),
       discount_applied: if(discount_applied == "Yes", do: 1, else: 0),
-      rating: rating,
-      repeat_customer: if(repeat_customer == "Yes", do: 1, else: 0)
+      rating: rating
     }
   end
 
