@@ -28,18 +28,18 @@ defmodule Knn.Seed do
       String.split(row, ",", trim: true)
 
     %{
-      customer_id: customer_id,
-      age: String.to_integer(age),
-      gender: gender,
-      city: city,
-      category: category,
-      product_name: product_name,
-      purchase_date: Date.from_iso8601!(purchase_date),
-      purchase_amount: String.to_float(purchase_amount),
-      payment_method: payment_method,
-      discount_applied: discount_applied,
-      rating: String.to_integer(rating),
-      repeat_customer: repeat_customer
+      customer_id: String.trim(customer_id),
+      age: String.to_integer(String.trim(age)),
+      gender: String.trim(gender),
+      city: String.trim(city),
+      category: String.trim(category),
+      product_name: String.trim(product_name),
+      purchase_date: Date.from_iso8601!(String.trim(purchase_date)),
+      purchase_amount: String.to_float(String.trim(purchase_amount)),
+      payment_method: String.trim(payment_method),
+      discount_applied: String.trim(discount_applied),
+      rating: String.to_integer(String.trim(rating)),
+      repeat_customer: String.trim(repeat_customer)
     }
   end
 
