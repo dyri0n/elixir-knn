@@ -75,6 +75,31 @@ defmodule Knn.Predictions do
     }
   end
 
+  def encode_row(%{
+        category: category,
+        gender: gender,
+        age: age,
+        city: city,
+        payment_method: payment_method,
+        discount_applied: discount_applied,
+        rating: rating,
+        purchase_date: purchase_date,
+        purchase_amount: purchase_amount
+      }) do
+    %{
+      category: hash_value(category),
+      gender: hash_value(gender),
+      age: age,
+      city: hash_value(city),
+      payment_method: hash_value(payment_method),
+      discount_applied: if(discount_applied == "Yes", do: 1, else: 0),
+      rating: rating,
+      # Convertimos la fecha a string ISO8601
+      purchase_date: Date.to_iso8601(purchase_date),
+      purchase_amount: purchase_amount
+    }
+  end
+
   defp hash_value(value) do
     # 1000 es el número de "buckets" o categorías posibles
     :erlang.phash2(value, 1000)
