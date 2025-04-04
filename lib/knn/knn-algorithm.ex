@@ -82,8 +82,9 @@ defmodule Knn.Algorithm do
 
   def console_predict do
     input_data = get_console_input()
-    k = IO.gets("Number of neighbors (k): ") |> String.trim() |> String.to_integer()
-    process_prediction(input_data, k)
+    k1 = IO.gets("Number of neighbors (k1): ") |> String.trim() |> String.to_integer()
+    k2 = IO.gets("Number of neighbors (k2): ") |> String.trim() |> String.to_integer()
+    process_prediction(input_data, k1, k2)
   end
 
   def get_console_input do
@@ -127,8 +128,14 @@ defmodule Knn.Algorithm do
     }
   end
 
-  defp process_prediction(input_data, k) do
-    Probability.find_similar_non_returning(input_data, k)
+  defp process_prediction(input_data, k1, k2) do
+    predict_if_someone_will_return(input_data, k1, k2)
+    # change if another function needs testing
+  end
+
+  defp predict_if_someone_will_return(input_data, k1, k2) do
+    similar_customers = Probability.find_similar_non_returning(input_data, k1)
+    repurchase_rate = Probability.find_repurchase_rate(similar_customers, k2)
   end
 
   defp to_boolean("true"), do: true
