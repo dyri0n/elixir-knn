@@ -1,0 +1,117 @@
+<h1 class="text-xl font-semibold mb-4">Predict Repeat Customer</h1>
+
+<.form for={to_form(@form_data)} action={~p"/predict"} method="post" class="space-y-4">
+
+  <!-- Category -->
+  <div>
+    <label for="category" class="block text-sm font-medium">Category</label>
+    <select name="category" id="category" class="w-full px-3 py-2 border rounded">
+      <%= for value <- @category_options do %>
+        <option value={value} selected={@form_data["category"] == value}><%= value %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <!-- Gender -->
+  <div>
+    <label for="gender" class="block text-sm font-medium">Gender</label>
+    <select name="gender" id="gender" class="w-full px-3 py-2 border rounded">
+      <%= for value <- @gender_options do %>
+        <option value={value} selected={@form_data["gender"] == value}><%= value %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <!-- Age -->
+  <div>
+    <label for="age" class="block text-sm font-medium">Age</label>
+    <input type="number" name="age" id="age" value={@form_data["age"] || 30} class="w-full px-3 py-2 border rounded" />
+  </div>
+
+  <!-- City -->
+  <div>
+    <label for="city" class="block text-sm font-medium">City</label>
+    <input type="text" name="city" id="city" list="city-list" autocomplete="off"
+          value={@form_data["city"]} class="w-full px-3 py-2 border rounded" />
+    <datalist id="city-list">
+      <%= for value <- @city_options do %>
+        <option value={value} />
+      <% end %>
+    </datalist>
+  </div>
+
+  <!-- Payment Method -->
+  <div>
+    <label for="payment_method" class="block text-sm font-medium">Payment Method</label>
+    <select name="payment_method" id="payment_method" class="w-full px-3 py-2 border rounded">
+      <%= for value <- @payment_method_options do %>
+        <option value={value} selected={@form_data["payment_method"] == value}><%= value %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <!-- Discount Applied -->
+  <div>
+    <label for="discount_applied" class="block text-sm font-medium">Discount Applied</label>
+    <input type="checkbox" name="discount_applied" id="discount_applied" value="true" 
+      checked={@form_data["discount_applied"] in ["true", true]} class="mr-2" />
+    <span class="text-sm">Yes</span>
+  </div>
+
+  <!-- Rating -->
+  <div>
+    <label for="rating" class="block text-sm font-medium">Rating</label>
+    <select name="rating" id="rating" class="w-full px-3 py-2 border rounded">
+      <%= for i <- 1..5 do %>
+        <option value={i} selected={@form_data["rating"] == Integer.to_string(i)}><%= i %> ★</option>
+      <% end %>
+    </select>
+  </div>
+
+
+  <!-- Purchase Date -->
+  <div>
+    <label for="purchase_date" class="block text-sm font-medium">Purchase Date</label>
+    <input type="date" name="purchase_date" id="purchase_date" value={@form_data["purchase_date"] || "2025-01-01"} class="w-full px-3 py-2 border rounded" />
+  </div>
+
+  <!-- Purchase Amount -->
+  <div>
+    <label for="purchase_amount" class="block text-sm font-medium">Purchase Amount</label>
+    <input type="number" step="0.01" name="purchase_amount" id="purchase_amount" value={@form_data["purchase_amount"] || 50.0} class="w-full px-3 py-2 border rounded" />
+  </div>
+
+  <!-- K neighbors -->
+  <div>
+    <label for="k" class="block text-sm font-medium">K Neighbors</label>
+    <input type="number" name="k" id="k" value={@form_data["k"] || 5} class="w-full px-3 py-2 border rounded" />
+  </div>
+
+  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Predict</button>
+</.form>
+
+<%= if @result do %>
+  <div class="mt-6">
+    <p class="text-lg"><strong>Prediction:</strong> <%= @result %></p>
+  </div>
+<% end %>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const input = document.getElementById("city");
+  const datalist = document.getElementById("city-list");
+
+  input.addEventListener("input", function() {
+    fetch(`/city_suggestions?q=${encodeURIComponent(input.value)}`)
+      .then(res => res.json())
+      .then(data => {
+        datalist.innerHTML = "";
+        data.forEach(city => {
+          const option = document.createElement("option");
+          option.value = city;
+          datalist.appendChild(option);
+        });
+      });
+  });
+});
+</script>

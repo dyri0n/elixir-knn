@@ -17,11 +17,9 @@ defmodule KnnWeb.Router do
   scope "/", KnnWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
-  end
-
-  scope "/api", KnnWeb do
-    get "/knn", CustomerController, :knn_match
+    get "/", PageController, :index
+    post "/predict", PageController, :predict
+    get "/city_suggestions", PageController, :city_suggestions
   end
 
   # Other scopes may use custom stacks.

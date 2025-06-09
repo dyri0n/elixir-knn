@@ -2,6 +2,7 @@ defmodule Knn.Algorithm do
   alias Knn.Probability
   alias Knn.Predictions
   alias Knn.{Repo, Customer}
+  alias Knn.Util
 
   def predict_probability(input_data, k \\ 10) do
     training_data = Predictions.get_training_data()
@@ -90,30 +91,25 @@ defmodule Knn.Algorithm do
   def get_console_input do
     IO.puts("Enter the following parameters:")
 
-    category = IO.gets("Category: ") |> String.trim()
-    gender = IO.gets("Gender: ") |> String.trim()
-    age = IO.gets("Age: ") |> String.trim() |> String.to_integer()
-    city = IO.gets("City: ") |> String.trim()
-    payment_method = IO.gets("Payment Method: ") |> String.trim()
+    category_default = "Clothing"
+    gender_default = "Male"
+    age_default = 30
+    city_default = "New York"
+    payment_method_default = "Credit Card"
+    discount_applied_default = true
+    rating_default = 5
+    purchase_date_default = ~D[2025-01-01]
+    purchase_amount_default = 50.0
 
-    discount_applied =
-      IO.gets("Discount Applied (true/false): ")
-      |> String.trim()
-      |> String.downcase()
-      |> to_boolean()
-
-    rating = IO.gets("Rating: ") |> String.trim() |> String.to_integer()
-
-    purchase_date =
-      IO.gets("Purchase Date (YYYY-MM-DD): ")
-      |> String.trim()
-      |> Date.from_iso8601!()
-
-    purchase_amount =
-      IO.gets("Purchase Amount: ")
-      |> String.trim()
-      |> Float.parse()
-      |> elem(0)
+    category = Util.get_input_with_default("Category: ", category_default)
+    gender = Util.get_input_with_default("Gender: ", gender_default)
+    age = Util.get_input_integer_with_default("Age: ", age_default)
+    city = Util.get_input_with_default("City: ", city_default)
+    payment_method = Util.get_input_with_default("Payment Method: ", payment_method_default)
+    discount_applied = Util.get_input_boolean_with_default("Discount Applied (true/false): ", discount_applied_default)
+    rating = Util.get_input_integer_with_default("Rating: ", rating_default)
+    purchase_date = Util.get_input_date_with_default("Purchase Date (YYYY-MM-DD): ", purchase_date_default)
+    purchase_amount = Util.get_input_float_with_default("Purchase Amount: ", purchase_amount_default)
 
     %{
       category: category,
@@ -137,8 +133,4 @@ defmodule Knn.Algorithm do
     similar_customers = Probability.find_similar_non_returning(input_data, k1)
     repurchase_rate = Probability.find_repurchase_rate(similar_customers, k2)
   end
-
-  defp to_boolean("true"), do: true
-  defp to_boolean("false"), do: false
-  defp to_boolean(_), do: raise("Invalid boolean value")
 end
