@@ -103,8 +103,8 @@ defmodule Knn.Predictor do
         (x - y) * (x - y)
 
       {x, y} when is_binary(x) and is_binary(y) ->
-        hx = :erlang.phash2(x, 1000)
-        hy = :erlang.phash2(y, 1000)
+        hx = hash(x)
+        hy = hash(y)
         (hx - hy) * (hx - hy)
 
       {x, y} when is_boolean(x) and is_boolean(y) ->
